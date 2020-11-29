@@ -1,7 +1,7 @@
 [package]
 name = "task_async"
 version = "0.1.0"
-authors = ["Ketaki Joshi <ketaki.joshi@yale.edu>, Caihua Li <caihua.li@yale.edu"]
+authors = ["Ketaki Joshi <ketaki.joshi@yale.edu>, Caihua Li <caihua.li@yale.edu>"]
 description = "contains the structs VFSDirectory and VFSFile, which are the most basic, generic implementers of the traits Directory and File, respectively. "
 
 

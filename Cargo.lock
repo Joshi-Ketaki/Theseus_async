@@ -2534,6 +2534,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "task_async"
+version = "0.1.0"
+dependencies = [
+ "fs_node",
+ "log",
+ "memory",
+ "path",
+ "root",
+ "spin",
+ "x86_64",
+]
+
+[[package]]
 name = "task_fs"
 version = "0.1.0"
 dependencies = [
@@ -2558,6 +2571,14 @@ dependencies = [
  "spin",
  "task",
  "x86_64",
+]
+
+[[package]]
+name = "test_async"
+version = "0.1.0"
+dependencies = [
+ "task_async",
+ "terminal_print",
 ]
 
 [[package]]

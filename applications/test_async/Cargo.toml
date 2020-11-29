@@ -1,0 +1,15 @@
+[package]
+name = "test_async"
+version = "0.1.0"
+authors = ["Caihua Li <caihua.li@yale.edu>, Ketaki Joshi <ketaki.joshi@yale.edu>"]
+description = "Tests Theseus's async task & executor implementations with a simple future"
+edition = "2018"
+
+[dependencies]
+
+
+[dependencies.terminal_print]
+path = "../../kernel/terminal_print"
+
+[dependencies.task_async]
+path = "../../kernel/task_async"
