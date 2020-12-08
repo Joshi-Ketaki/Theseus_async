@@ -1,10 +1,13 @@
 #![no_std]
+
 extern crate alloc;
 extern crate memory;
 extern crate x86_64;
-use core::{future::Future, pin::Pin};
+
 use alloc::boxed::Box;
+use core::{future::Future, pin::Pin};
 use core::task::{Context, Poll};
+
 pub struct AsyncTask {
     // skipping name and id fields. not needed.
     future: Pin<Box<dyn Future<Output = ()>>>,

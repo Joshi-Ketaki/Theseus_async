@@ -3,6 +3,7 @@ name = "async_keyboard"
 version = "0.1.0"
 authors = ["Ketaki Joshi <ketaki.joshi@yale.edu>, Caihua Li <caihua.li@yale.edu>"]
 build = "../../build.rs"
+edition = "2018"
 
 [dependencies]
 getopts = "0.2.21"
@@ -33,6 +34,16 @@ path = "../../libs/stdio"
 [dependencies.log]
 version = "0.4.8"
 
+[dependencies.terminal_print]
+path = "../../kernel/terminal_print"
+
+[dependencies.task_async]
+path = "../../kernel/task_async"
+
+[dependencies.futures-util]
+version = "0.3.4"
+default-features = false
+features = ["alloc"]
 
 [lib]
 crate-type = ["rlib"]
