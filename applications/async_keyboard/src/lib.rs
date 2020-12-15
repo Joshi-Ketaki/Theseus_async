@@ -19,6 +19,7 @@ use task_async::async_executor::AsyncExecutor;
 use keycodes_ascii::KeyAction;
 use stdio::KeyEventReadGuard;
 use libterm::Terminal;
+use stdio::WAKER;
 
 pub struct KeyEventStream {
     num_of_char: u64,
@@ -40,6 +41,9 @@ impl Stream for KeyEventStream {
     type Item = u8;
     fn poll_next(mut self: Pin<&mut Self>, _cx: &mut Context) -> Poll<Option<u8>> {
         if self.num_of_char == 0 { return Poll::Ready(None); }      // completed
+        // Register the waker so that whenever a wake call occurs after this
+        // the task is notified.
+         WAKER.register(&_cx.waker());
         if let Some(ref key_event_queue) = *self.read_guard {
             loop {
                 match key_event_queue.read_one() {
@@ -53,10 +57,16 @@ impl Stream for KeyEventStream {
                                     if let Err(e) = locked_terminal.refresh_display() {
                                         error!("{}", e);
                                     }
+                                    // Remove the registered waker because we do not need to be notified
+                                    // now.
+                                    WAKER.take();
                                     return Poll::Ready(Some(c as u8));
                                 },
                                 _ => {      // early exit
                                     error!("Couldn't get key event");
+                                    // Remove the registered waker because we do not need to be notified
+                                    // now.
+                                    WAKER.take();
                                     return Poll::Ready(None);
                                 },
                             }
@@ -71,6 +81,7 @@ impl Stream for KeyEventStream {
         }
         else {      // early exit
             error!("failed to take key event reader");
+            WAKER.take();
             return Poll::Ready(None);
         }
     }
