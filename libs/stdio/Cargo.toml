@@ -11,7 +11,5 @@ bare-io = { version = "0.2.1", features = [ "alloc" ] }
 [dependencies.keycodes_ascii]
 path = "../keycodes_ascii"
 
-
-
 [lib]
 crate-type = ["rlib"]

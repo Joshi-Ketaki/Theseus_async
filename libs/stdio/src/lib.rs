@@ -7,26 +7,16 @@ extern crate alloc;
 extern crate spin;
 extern crate bare_io;
 extern crate keycodes_ascii;
-// extern crate futures_util;
+
 use alloc::collections::VecDeque;
 use alloc::sync::Arc;
 use alloc::boxed::Box;
 use alloc::string::String;
-// use futures_util::task::AtomicWaker;
 use alloc::vec::Vec;
 use spin::{Mutex, MutexGuard};
 use bare_io::{Read, Write};
 use keycodes_ascii::KeyEvent;
 use core::ops::Deref;
-
-
-// We use Atomic Waker instead of RawWaker. 
-// This is because Atomic Waker has the capability to handle concurrent wakes by multiple consumers even
-// if modified by one of them. 
-// Atomic Waker utilities handle memory ordering and consistency rules as well as opposed to a Raw
-// Waker which is more of a custom waker support.
-
-// pub static WAKER: AtomicWaker = AtomicWaker::new();
 
 /// A ring buffer with an EOF mark.
 pub struct RingBufferEof<T> {
@@ -373,7 +363,6 @@ impl KeyEventQueueWriter {
     pub fn write_one(&self, key_event: KeyEvent) {
         let mut locked_queue = self.key_event_queue.lock();
         locked_queue.queue.push_back(key_event);
-        // WAKER.wake();
     }
 }
 
