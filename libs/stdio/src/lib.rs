@@ -26,7 +26,7 @@ use futures_util::task::AtomicWaker;
 // Atomic Waker utilities handle memory ordering and consistency rules as well as opposed to a Raw
 // Waker which is more of a custom waker support.
 
- pub static WAKER: AtomicWaker = AtomicWaker::new();
+pub static WAKER: AtomicWaker = AtomicWaker::new();
 
 /// A ring buffer with an EOF mark.
 pub struct RingBufferEof<T> {
@@ -319,42 +319,48 @@ impl<'a> StdioWriteGuard<'a> {
 
 pub struct KeyEventQueue {
     /// A ring buffer storing `KeyEvent`.
-    key_event_queue: RingBufferEofRef<KeyEvent>
+    key_event_queue: RingBufferEofRef<KeyEvent>,
+    waker: Arc<AtomicWaker>,
 }
 
 /// A reader to keyevent ring buffer.
 #[derive(Clone)]
 pub struct KeyEventQueueReader {
     /// Points to the ring buffer storing `KeyEvent`.
-    key_event_queue: RingBufferEofRef<KeyEvent>
+    key_event_queue: RingBufferEofRef<KeyEvent>,
+    waker: Arc<AtomicWaker>,
 }
 
 /// A writer to keyevent ring buffer.
 #[derive(Clone)]
 pub struct KeyEventQueueWriter {
     /// Points to the ring buffer storing `KeyEvent`.
-    key_event_queue: RingBufferEofRef<KeyEvent>
+    key_event_queue: RingBufferEofRef<KeyEvent>,
+    waker: Arc<AtomicWaker>,
 }
 
 impl KeyEventQueue {
     /// Create a new ring buffer storing `KeyEvent`.
     pub fn new() -> KeyEventQueue {
         KeyEventQueue {
-            key_event_queue: Arc::new(Mutex::new(RingBufferEof::new()))
+            key_event_queue: Arc::new(Mutex::new(RingBufferEof::new())),
+            waker: Arc::new(AtomicWaker::new()),
         }
     }
 
     /// Get a reader to the ring buffer.
     pub fn get_reader(&self) -> KeyEventQueueReader {
         KeyEventQueueReader {
-            key_event_queue: self.key_event_queue.clone()
+            key_event_queue: self.key_event_queue.clone(),
+            waker: self.waker.clone(),
         }
     }
 
     /// Get a writer to the ring buffer.
     pub fn get_writer(&self) -> KeyEventQueueWriter {
         KeyEventQueueWriter {
-            key_event_queue: self.key_event_queue.clone()
+            key_event_queue: self.key_event_queue.clone(),
+            waker: self.waker.clone(),
         }
     }
 }
@@ -366,6 +372,9 @@ impl KeyEventQueueReader {
         let mut locked_queue = self.key_event_queue.lock();
         locked_queue.queue.pop_front()
     }
+    pub fn get_waker(&self) -> Arc<AtomicWaker> {
+        self.waker.clone()
+    }
 }
 
 impl KeyEventQueueWriter {
@@ -373,7 +382,7 @@ impl KeyEventQueueWriter {
     pub fn write_one(&self, key_event: KeyEvent) {
         let mut locked_queue = self.key_event_queue.lock();
         locked_queue.queue.push_back(key_event);
-        WAKER.wake();
+        self.waker.wake();
     }
 }
 

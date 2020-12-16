@@ -2505,6 +2505,7 @@ name = "stdio"
 version = "0.1.0"
 dependencies = [
  "bare-io",
+ "futures-util",
  "keycodes_ascii",
  "spin",
 ]

@@ -13,13 +13,12 @@ extern crate futures_util;
 use spin::Mutex;
 use alloc::{sync::Arc, string::{String, ToString}};
 use core::{str, pin::Pin, task::{Poll, Context}};
-use futures_util::stream::{Stream, StreamExt};
+use futures_util::{stream::{Stream, StreamExt}};
 use task_async::AsyncTask;
 use task_async::async_executor::AsyncExecutor;
 use keycodes_ascii::KeyAction;
 use stdio::KeyEventReadGuard;
 use libterm::Terminal;
-use stdio::WAKER;
 
 pub struct KeyEventStream {
     num_of_char: u64,
@@ -43,8 +42,9 @@ impl Stream for KeyEventStream {
         if self.num_of_char == 0 { return Poll::Ready(None); }      // completed
         // Register the waker so that whenever a wake call occurs after this
         // the task is notified.
-         WAKER.register(&_cx.waker());
         if let Some(ref key_event_queue) = *self.read_guard {
+            let waker = key_event_queue.get_waker();
+            waker.register(&_cx.waker());
             loop {
                 match key_event_queue.read_one() {
                     Some(keyevent) => {
@@ -59,14 +59,14 @@ impl Stream for KeyEventStream {
                                     }
                                     // Remove the registered waker because we do not need to be notified
                                     // now.
-                                    WAKER.take();
+                                    waker.take();
                                     return Poll::Ready(Some(c as u8));
                                 },
                                 _ => {      // early exit
                                     error!("Couldn't get key event");
                                     // Remove the registered waker because we do not need to be notified
                                     // now.
-                                    WAKER.take();
+                                    waker.take();
                                     return Poll::Ready(None);
                                 },
                             }
@@ -81,7 +81,6 @@ impl Stream for KeyEventStream {
         }
         else {      // early exit
             error!("failed to take key event reader");
-            WAKER.take();
             return Poll::Ready(None);
         }
     }
