@@ -23,6 +23,7 @@ use libterm::Terminal;
 // KeyEvent stream structure represents a char stream from keyboard to the terminal 
 pub struct KeyEventStream {
     num_of_char: u64,
+    num_of_pending: u64,                // remove it after we support waker for the executor
     read_guard: KeyEventReadGuard,
     terminal: Arc<Mutex<Terminal>>,
 }
@@ -31,6 +32,7 @@ impl KeyEventStream {
     pub fn new(num: u64, read_guard: KeyEventReadGuard, terminal: Arc<Mutex<Terminal>>) -> Self {
         KeyEventStream {
             num_of_char: num,
+            num_of_pending: 0,
             read_guard: read_guard,
             terminal: terminal,
         }
@@ -81,11 +83,14 @@ impl Stream for KeyEventStream {
                         // This will consume much resource like cpu time and cause delay to the response
                         // to the keyboard input. It happens because our current executor still keep polling
                         // TODO: add waker support to the executor
-                        let mut locked_terminal = self.terminal.lock();
-                        locked_terminal.print_to_terminal(".".to_string());
-                        if let Err(e) = locked_terminal.refresh_display() {
-                            error!("{}", e);
+                        if self.num_of_pending % 5000 == 0 {
+                            let mut locked_terminal = self.terminal.lock();
+                            locked_terminal.print_to_terminal(".".to_string());
+                            if let Err(e) = locked_terminal.refresh_display() {
+                                error!("{}", e);
+                            }
                         }
+                        self.num_of_pending += 1;
                         return Poll::Pending;  // no key event
                     },
                 }
