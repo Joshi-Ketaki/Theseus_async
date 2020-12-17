@@ -20,14 +20,6 @@ use keycodes_ascii::KeyEvent;
 use core::ops::Deref;
 use futures_util::task::AtomicWaker;
 
-// We use Atomic Waker instead of RawWaker. 
-// This is because Atomic Waker has the capability to handle concurrent wakes by multiple consumers even
-// if modified by one of them. 
-// Atomic Waker utilities handle memory ordering and consistency rules as well as opposed to a Raw
-// Waker which is more of a custom waker support.
-
-pub static WAKER: AtomicWaker = AtomicWaker::new();
-
 /// A ring buffer with an EOF mark.
 pub struct RingBufferEof<T> {
     /// The ring buffer.
@@ -316,6 +308,12 @@ impl<'a> StdioWriteGuard<'a> {
         self.guard.lock().end = true;
     }
 }
+
+// We use Atomic Waker instead of RawWaker for each KeyEventQueue. 
+// This is because Atomic Waker has the capability to handle concurrent wakes by multiple consumers even
+// if modified by one of them. 
+// Atomic Waker utilities handle memory ordering and consistency rules as well as opposed to a Raw
+// Waker which is more of a custom waker support.
 
 pub struct KeyEventQueue {
     /// A ring buffer storing `KeyEvent`.

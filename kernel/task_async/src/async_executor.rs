@@ -9,6 +9,7 @@ use core::task::{Context, Poll};
 pub struct AsyncExecutor {
     async_tasklist: VecDeque<AsyncTask>,
 }
+
 // init a new tasklist.
 //TODO : think of restricting queue size later, if do not want infinite async requests
 impl AsyncExecutor {
@@ -48,9 +49,10 @@ impl AsyncExecutor {
             let waker = async_waker();
             let mut context = Context::from_waker(&waker);
             match task.poll(&mut context) {
-                Poll::Ready(()) => {} // task is done and has been popped already. 
-                //so need for explicit pop
-                Poll::Pending => self.async_tasklist.push_back(task),
+                Poll::Ready(()) => {}   // task is done and has been popped already. 
+                Poll::Pending => {      // explicit push again
+                    self.async_tasklist.push_back(task);
+                },
             }
         }
     }

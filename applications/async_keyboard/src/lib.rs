@@ -20,6 +20,7 @@ use keycodes_ascii::KeyAction;
 use stdio::KeyEventReadGuard;
 use libterm::Terminal;
 
+// KeyEvent stream structure represents a char stream from keyboard to the terminal 
 pub struct KeyEventStream {
     num_of_char: u64,
     read_guard: KeyEventReadGuard,
@@ -40,9 +41,9 @@ impl Stream for KeyEventStream {
     type Item = u8;
     fn poll_next(mut self: Pin<&mut Self>, _cx: &mut Context) -> Poll<Option<u8>> {
         if self.num_of_char == 0 { return Poll::Ready(None); }      // completed
-        // Register the waker so that whenever a wake call occurs after this
-        // the task is notified.
         if let Some(ref key_event_queue) = *self.read_guard {
+            // Register the waker so that whenever a wake call occurs after this
+            // the task is notified.
             let waker = key_event_queue.get_waker();
             waker.register(&_cx.waker());
             loop {
@@ -75,7 +76,18 @@ impl Stream for KeyEventStream {
                             continue;           // other than pressing a key
                         }
                     },
-                    _ => return Poll::Pending,  // no key event
+                    _ => {
+                        // Print '.' to show it is pending
+                        // This will consume much resource like cpu time and cause delay to the response
+                        // to the keyboard input. It happens because our current executor still keep polling
+                        // TODO: add waker support to the executor
+                        let mut locked_terminal = self.terminal.lock();
+                        locked_terminal.print_to_terminal(".".to_string());
+                        if let Err(e) = locked_terminal.refresh_display() {
+                            error!("{}", e);
+                        }
+                        return Poll::Pending;  // no key event
+                    },
                 }
             }
         }
@@ -101,7 +113,7 @@ fn run() -> Result<(), &'static str> {
 
         // Get a reference to this task's terminal. The terminal is *not* locked here.
         if let Some(terminal) = app_io::get_my_terminal() {
-            let key_event_stream = KeyEventStream::new(10, key_event_queue, terminal);  // key event stream for async read
+            let key_event_stream = KeyEventStream::new(10, key_event_queue, terminal);  // key event stream for async_read
             println!("Ready to call async_read.");
             let mut executor = AsyncExecutor::new();
             let task = AsyncTask::new(async_read(key_event_stream));
@@ -115,6 +127,7 @@ fn run() -> Result<(), &'static str> {
         }
     }
 
+    // Test stdin after async_read is done and the queue is returned
     println!("key_event_queue is returned and try to read from stdio.");
     let mut stdin = app_io::stdin()?;
     let mut message = String::new();
