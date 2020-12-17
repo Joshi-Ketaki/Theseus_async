@@ -126,7 +126,7 @@ fn run() -> Result<(), &'static str> {
             executor.spawn(task);
 
             println!("Ready to run executor.");
-            println!("Please input 10 char with your keyboard while the '.' is prompting.");
+            println!("Please input charachters with your keyboard while the '.' is prompting.");
             executor.run();     // current thread is used for executor, so blocking the following code
         }
         else {
