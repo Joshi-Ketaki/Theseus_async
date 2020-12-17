@@ -6,8 +6,9 @@ This is an experimental branch of Theseus where we introduce first-of-its-kind a
 This is a first step in providing asynchronous support in Theseus and is in its nascent stage. It now has a grounding inside Theseus based on which newer asynchronous IO could be added.
 
 # Benefits of Asynchronous IO:
-IO operations are usually blocking. If overlapped with other work, it is beneficial to increase system utilization. Also multiple IO operations can proceed in the background with other operations happening in the foreground and hence increasing the system's throughput. Hence asynchronous IO not only improves CPU utilization but also improves system throughput. However, asynchrony is non-intutive interms of programmabilitya, maintainence and debugging.
+IO operations are usually blocking. If overlapped with other work, it is beneficial to increase system utilization. Also multiple IO operations can proceed in the background with other operations happening in the foreground and hence increasing the system's throughput. Hence asynchronous IO not only improves CPU utilization but also improves system throughput. However, asynchrony is non-intutive interms of programmability, maintainence and debugging.
 ## Challenges in Asynchrony:
+Asynchrony is a non-intuitive programming model to reason about. It is difficult to predict control akin to an event state machine a programmer builds. This is because there is no local control as to when an asynchronous operation will return. This brings with itself many scheduling and task priority ordering challenges.
 
 ## Why Rust ?
 We leverage Rust's intralingual power to shift the hard-to-reason about parts of asynchrony such as task ordering, priorities, signalling task completion, maintaining local ordering etc to improve programmability, maintainence and debugging while providing the power of asynchronous IO.
