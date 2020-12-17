@@ -108,6 +108,7 @@ async fn async_read(mut key_event_stream: KeyEventStream) {
     while let Some(c) = key_event_stream.next().await {
         message.push(c as char);
     }
+    println!("");
     println!("message = {}", message);
 }
 
@@ -125,6 +126,7 @@ fn run() -> Result<(), &'static str> {
             executor.spawn(task);
 
             println!("Ready to run executor.");
+            println!("Please input 10 char with your keyboard while the '.' is prompting.");
             executor.run();     // current thread is used for executor, so blocking the following code
         }
         else {
@@ -133,11 +135,12 @@ fn run() -> Result<(), &'static str> {
     }
 
     // Test stdin after async_read is done and the queue is returned
-    println!("key_event_queue is returned and try to read from stdio.");
+    println!("key_event_queue is returned and now we try to read from the stdio.");
+    println!("Please input a line end with Enter.");
     let mut stdin = app_io::stdin()?;
     let mut message = String::new();
     let _cnt = stdin.read_line(&mut message);
-    println!("{}", message);
+    println!("message = {}", message);
     Ok(())
 }
 
