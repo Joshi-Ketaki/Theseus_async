@@ -17,14 +17,16 @@ We leverage Rust's intralingual power to shift the hard-to-reason about parts of
 We choose a clean approach which does not disturb existing robust and tried synchronous paths. The benefit is that existing scheduler and task structures and their dependencies remain untouched, leaving the OS in an operable robust fallback state always. Also, the existing scheduler can be leveraged as is for the new asynchronous task structure and framework. 
 
 # Benefits of current support :
-Foundation for Async IO in Theseus : This is afirst of its kind support and is far from being perfect. This version mainly sets up the asynchronous framework in Theseus and enables one of the IO devices (keyboard) in leveraging this support.
+Foundation for Async IO in Theseus : This is a first of its kind support and is far from being perfect. This version mainly sets up the asynchronous framework in Theseus and enables one of the IO devices (keyboard) in leveraging this support.
+
+Correctness : The current support guarantees correctness of functionality. i.e. the input keys from keyboard are correctly intaken without dropping any inputs. 
 
 Ease of programmability - Providing asynchrony with Rust primitives enabled us to leverage async IO without worrying about changing the scheduler or managing returns from an async call for managing data consistency across tasks, managing task priorities , notifiying task completions in lieu of concurrency etc. Rust async primitives such as waker's register and atomic waker act as synchronization primitives and push these responsibilities to the compiler. This made async support addition much better in terms of programmability as opposed to doing this in a C based OS where onus of data consistency, priority management etc falls on the programmer.
 
 
 # Limitations and Future Improvements :
-
 Performance : The current executor keeps on polling and hence takes some time to print out the asynchronous operation result. Due to lack of time, this version does not have that capability. This is the next logical step to the current implementation and the solution is to make the executor an asynchronous executor so that it does not do busy polling.
+
 # Setting up Theseus :
 
 Information about building, setting up and debugging Theseus and its dependencies still remains the same as mentioned here : https://github.com/theseus-os/Theseus.
