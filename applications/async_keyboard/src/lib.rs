@@ -16,22 +16,20 @@ use core::{str, pin::Pin, task::{Poll, Context}};
 use futures_util::{stream::{Stream, StreamExt}};
 use task_async::AsyncTask;
 use task_async::async_executor::AsyncExecutor;
-use keycodes_ascii::KeyAction;
+use keycodes_ascii::{Keycode, KeyAction};
 use stdio::KeyEventReadGuard;
 use libterm::Terminal;
 
 // KeyEvent stream structure represents a char stream from keyboard to the terminal 
 pub struct KeyEventStream {
-    num_of_char: u64,
     num_of_pending: u64,                // remove it after we support waker for the executor
     read_guard: KeyEventReadGuard,
     terminal: Arc<Mutex<Terminal>>,
 }
 
 impl KeyEventStream {
-    pub fn new(num: u64, read_guard: KeyEventReadGuard, terminal: Arc<Mutex<Terminal>>) -> Self {
+    pub fn new(read_guard: KeyEventReadGuard, terminal: Arc<Mutex<Terminal>>) -> Self {
         KeyEventStream {
-            num_of_char: num,
             num_of_pending: 0,
             read_guard: read_guard,
             terminal: terminal,
@@ -42,7 +40,6 @@ impl KeyEventStream {
 impl Stream for KeyEventStream {
     type Item = u8;
     fn poll_next(mut self: Pin<&mut Self>, _cx: &mut Context) -> Poll<Option<u8>> {
-        if self.num_of_char == 0 { return Poll::Ready(None); }      // completed
         if let Some(ref key_event_queue) = *self.read_guard {
             // Register the waker so that whenever a wake call occurs after this
             // the task is notified.
@@ -52,9 +49,11 @@ impl Stream for KeyEventStream {
                 match key_event_queue.read_one() {
                     Some(keyevent) => {
                         if keyevent.action == KeyAction::Pressed { 
+                            if keyevent.keycode == Keycode::Enter {
+                                return Poll::Ready(None);       // completed
+                            }
                             match keyevent.keycode.to_ascii(keyevent.modifiers) {
                                 Some(c) => {
-                                    self.num_of_char -= 1;
                                     let mut locked_terminal = self.terminal.lock();
                                     locked_terminal.print_to_terminal(c.to_string());
                                     if let Err(e) = locked_terminal.refresh_display() {
@@ -119,7 +118,7 @@ fn run() -> Result<(), &'static str> {
 
         // Get a reference to this task's terminal. The terminal is *not* locked here.
         if let Some(terminal) = app_io::get_my_terminal() {
-            let key_event_stream = KeyEventStream::new(10, key_event_queue, terminal);  // key event stream for async_read
+            let key_event_stream = KeyEventStream::new(key_event_queue, terminal);  // key event stream for async_read
             println!("Ready to call async_read.");
             let mut executor = AsyncExecutor::new();
             let task = AsyncTask::new(async_read(key_event_stream));
@@ -127,6 +126,7 @@ fn run() -> Result<(), &'static str> {
 
             println!("Ready to run executor.");
             println!("Please input charachters with your keyboard while the '.' is prompting.");
+            println!("And press Enter to end the input.");
             executor.run();     // current thread is used for executor, so blocking the following code
         }
         else {
