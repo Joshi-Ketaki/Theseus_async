@@ -1,9 +1,16 @@
 # Asynchronous IO in Theseus : 
 
 Theseus : https://github.com/theseus-os/Theseus is an experimental OS written in Rust to leverage the intralinguality of Rust and designed to shift the OS responsibilities onto the compiler.
-We exploit this intralinguality power of Rust to reason about a non-intuitive paradigm - Asynchronous IO. We believe that shifting most of the responsibilities to the compiler can help 
+We exploit this intralinguality power of Rust to reason about a non-intuitive paradigm - Asynchronous IO. 
 This is an experimental branch of Theseus where we introduce first-of-its-kind asynchronous IO framework in Theseus.
 This is a first step in providing asynchronous support in Theseus and is in its nascent stage. It now has a grounding inside Theseus based on which newer asynchronous IO could be added.
+
+# Benefits of Asynchronous IO:
+IO operations are usually blocking. If overlapped with other work, it is beneficial to increase system utilization. Also multiple IO operations can proceed in the background with other operations happening in the foreground and hence increasing the system's throughput. Hence asynchronous IO not only improves CPU utilization but also improves system throughput. However, asynchrony is non-intutive interms of programmabilitya, maintainence and debugging.
+## Challenges in Asynchrony:
+
+## Why Rust ?
+We leverage Rust's intra lingual power to shift the hard-to-reason about parts of asynchrony such as task ordering, priorities, signalling task completion, maintaining local ordering etc to improve programmability, maintainence and debugging while providing the power of asynchronous IO.
 
 # Design details :
 We choose a clean approach which does not disturb existing robust and tried synchronous paths. The benefit is that existing scheduler and task structures and their dependencies remain untouched, leaving the OS in an operable robust fallback state always. Also, the existing scheduler can be leveraged as is for the new asynchronous task structure and framework. 
