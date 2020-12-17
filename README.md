@@ -10,7 +10,7 @@ IO operations are usually blocking. If overlapped with other work, it is benefic
 ## Challenges in Asynchrony:
 
 ## Why Rust ?
-We leverage Rust's intra lingual power to shift the hard-to-reason about parts of asynchrony such as task ordering, priorities, signalling task completion, maintaining local ordering etc to improve programmability, maintainence and debugging while providing the power of asynchronous IO.
+We leverage Rust's intralingual power to shift the hard-to-reason about parts of asynchrony such as task ordering, priorities, signalling task completion, maintaining local ordering etc to improve programmability, maintainence and debugging while providing the power of asynchronous IO.
 
 # Design details :
 We choose a clean approach which does not disturb existing robust and tried synchronous paths. The benefit is that existing scheduler and task structures and their dependencies remain untouched, leaving the OS in an operable robust fallback state always. Also, the existing scheduler can be leveraged as is for the new asynchronous task structure and framework. 
@@ -34,10 +34,10 @@ async_keyboard : Run 'async_keyboard' on the QEMU shell
 It will expect you to key-input certain keys which will be displayed after a delay (asynchronous processing) highlighting that it is being processed in the background and 
 could be overlapped with other work.
 
-test_async : This is the 'hello world' test fopr async framework in Theseus. 
+test_async : This is the 'hello world' test for async framework in Theseus. 
 
 # Limitations and future improvements :
-The current executor keeps on polling and hence takes some time to print out the asynchronous operation result. Due to lack of time, this version does not have that capability. This is the next logical step to the current implementation and the solution is to make the executor an asynchronous executor so that it f=does not do busy polling.
+The current executor keeps on polling and hence takes some time to print out the asynchronous operation result. Due to lack of time, this version does not have that capability. This is the next logical step to the current implementation and the solution is to make the executor an asynchronous executor so that it does not do busy polling.
 
 ## Acknowledgements
 We would like acknowledge existing Theseus framework and Kevin Boos for his help in bouncing off ideas and discussions. Also, Philipp Oppermann's [blog_os](https://os.phil-opp.com/). It is a great starting point in understanding building of an OS in Rust and asynchronous support in Theseus.
